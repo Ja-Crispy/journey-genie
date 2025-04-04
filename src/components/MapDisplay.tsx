@@ -5,14 +5,13 @@ import { MapPin, Download } from 'lucide-react';
 const MapDisplay = () => {
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-sm">
-      <div className="relative h-48 bg-gray-200">
-        {/* In a real app, this would be replaced with a Google Maps or Mapbox component */}
-        <div className="absolute inset-0 overflow-hidden">
-          <img 
-            src="/lovable-uploads/503a0016-f16c-4736-af51-831bea9ce870.png" 
-            alt="Map of Barcelona" 
-            className="w-full h-full object-cover"
-          />
+      <div className="relative h-48 bg-teal-50">
+        {/* Map placeholder - would be replaced with actual map integration */}
+        <div className="absolute inset-0 overflow-hidden bg-gray-100 flex items-center justify-center">
+          <div className="text-gray-400 text-center p-4">
+            <MapPin size={36} className="mx-auto mb-2 text-teal-500" />
+            <p className="text-sm">Interactive map will be displayed here</p>
+          </div>
         </div>
         
         {/* Location marker */}
