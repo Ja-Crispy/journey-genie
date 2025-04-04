@@ -6,13 +6,12 @@ const MapDisplay = () => {
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-sm">
       <div className="relative h-48 bg-gray-200">
-        {/* In a real app, this would be replaced with a Google Maps or Mapbox component */}
-        <div className="absolute inset-0 overflow-hidden">
-          <img 
-            src="/lovable-uploads/503a0016-f16c-4736-af51-831bea9ce870.png" 
-            alt="Map of Barcelona" 
-            className="w-full h-full object-cover"
-          />
+        {/* Map area */}
+        <div className="absolute inset-0 bg-teal-50 flex items-center justify-center overflow-hidden">
+          <div className="text-teal-500 text-center px-4">
+            <MapPin size={36} className="mx-auto mb-2" />
+            <p className="text-sm">Interactive map will be displayed here</p>
+          </div>
         </div>
         
         {/* Location marker */}
