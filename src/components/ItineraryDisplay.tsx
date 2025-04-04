@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ChevronRight, Plane, Bed, Map, Check } from 'lucide-react';
+import { ChevronRight, Plane, Bed, Map, Check, Building, Utensils } from 'lucide-react';
 
 type ItineraryItem = {
   id: string;
