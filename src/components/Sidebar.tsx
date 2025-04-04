@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, User, MessageSquare, Settings } from 'lucide-react';
 
 type SidebarProps = {
@@ -8,6 +9,7 @@ type SidebarProps = {
 };
 
 const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
+  const location = useLocation();
   const previousChats = [
     { id: 1, title: "Trip to Paris", date: "Mar 15" },
     { id: 2, title: "Weekend in Rome", date: "Apr 2" },
@@ -63,12 +65,45 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
             </ul>
           </div>
 
-          {/* Settings */}
+          {/* Navigation */}
           <div className="p-4 border-t">
-            <button className="w-full text-left p-2 rounded-lg hover:bg-gray-100 flex items-center space-x-2">
-              <Settings size={16} className="text-teal-500" />
-              <span className="text-sm">Settings</span>
-            </button>
+            <nav>
+              <ul className="space-y-2">
+                <li>
+                  <Link 
+                    to="/" 
+                    className={`w-full text-left p-2 rounded-lg flex items-center space-x-2 ${
+                      location.pathname === '/' ? 'bg-teal-500 text-white' : 'hover:bg-gray-100'
+                    }`}
+                  >
+                    <MessageSquare size={16} className={location.pathname === '/' ? 'text-white' : 'text-teal-500'} />
+                    <span className="text-sm">Chat</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to="/profile" 
+                    className={`w-full text-left p-2 rounded-lg flex items-center space-x-2 ${
+                      location.pathname === '/profile' ? 'bg-teal-500 text-white' : 'hover:bg-gray-100'
+                    }`}
+                  >
+                    <User size={16} className={location.pathname === '/profile' ? 'text-white' : 'text-teal-500'} />
+                    <span className="text-sm">Profile</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to="/settings" 
+                    className={`w-full text-left p-2 rounded-lg flex items-center space-x-2 ${
+                      location.pathname === '/settings' ? 'bg-teal-500 text-white' : 'hover:bg-gray-100'
+                    }`}
+                  >
+                    <Settings size={16} className={location.pathname === '/settings' ? 'text-white' : 'text-teal-500'} />
+                    <span className="text-sm">Settings</span>
+                  </Link>
+                </li>
+              </ul>
+            </nav>
           </div>
         </div>
       </aside>
