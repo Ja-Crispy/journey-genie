@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Building, Utensils } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import ChatInterface from '../components/ChatInterface';
 import BudgetSlider from '../components/BudgetSlider';
@@ -25,6 +26,10 @@ const Index = () => {
         {/* Header */}
         <header className="p-4 bg-white shadow-sm flex items-center justify-between">
           <h1 className="text-2xl font-bold text-charcoal">Agentic Travel Assistant</h1>
+          <div className="flex items-center">
+            <img src="https://reactjs.org/logo-og.png" alt="React Logo" className="h-8 w-8" />
+            <span className="ml-2 font-medium text-teal-700">React</span>
+          </div>
         </header>
 
         {/* Main layout */}
