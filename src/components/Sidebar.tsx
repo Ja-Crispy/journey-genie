@@ -71,12 +71,12 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
               <ul className="space-y-2">
                 <li>
                   <Link 
-                    to="/" 
+                    to="/chat" 
                     className={`w-full text-left p-2 rounded-lg flex items-center space-x-2 ${
-                      location.pathname === '/' ? 'bg-teal-500 text-white' : 'hover:bg-gray-100'
+                      location.pathname === '/chat' ? 'bg-teal-500 text-white' : 'hover:bg-gray-100'
                     }`}
                   >
-                    <MessageSquare size={16} className={location.pathname === '/' ? 'text-white' : 'text-teal-500'} />
+                    <MessageSquare size={16} className={location.pathname === '/chat' ? 'text-white' : 'text-teal-500'} />
                     <span className="text-sm">Chat</span>
                   </Link>
                 </li>
