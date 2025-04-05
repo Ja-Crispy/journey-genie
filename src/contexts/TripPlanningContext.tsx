@@ -37,6 +37,31 @@ interface TripPlanningContextType {
 
 const TripPlanningContext = createContext<TripPlanningContextType | undefined>(undefined);
 
+// Helper function to extract itinerary from a message
+const extractItineraryFromMessage = (content: string) => {
+  try {
+    const dayMatches = content.match(/Day \d+:[\s\S]*?(?=Day \d+:|$)/g);
+    
+    if (!dayMatches) return null;
+    
+    return dayMatches.map((dayText, index) => {
+      const activities = dayText
+        .replace(/Day \d+:/, '')
+        .split('\n')
+        .filter(line => line.trim())
+        .map(activity => activity.trim().replace(/^[•\-\*]\s*/, ''));
+      
+      return {
+        day: index + 1,
+        activities
+      };
+    });
+  } catch (error) {
+    console.error('Error extracting itinerary:', error);
+    return null;
+  }
+};
+
 export function TripPlanningProvider({ children }: { children: React.ReactNode }) {
   const [budget, setBudget] = useState<number[]>([1500]);
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
@@ -129,15 +154,24 @@ export function TripPlanningProvider({ children }: { children: React.ReactNode }
   const loadChatSession = (chatId: string) => {
     const chat = chatHistory.find(c => c.id === chatId);
     if (chat) {
-      // First clear any existing state
-      setItinerary([]);
-      
-      // Then load the saved chat data
+      // First set currentChatId and destination
       setCurrentChatId(chatId);
       setDestination(chat.destination || '');
       
-      // We don't need to manually set the messages here
-      // The ChatInterface component should pull them from chatHistory using currentChatId
+      // Then try to extract itinerary from chat messages
+      if (chat.messages && chat.messages.length > 0) {
+        // Look for messages from assistant that might contain itinerary
+        for (let i = chat.messages.length - 1; i >= 0; i--) {
+          const message = chat.messages[i];
+          if (message.sender === 'assistant' && message.content.includes('Day')) {
+            const extractedItinerary = extractItineraryFromMessage(message.content);
+            if (extractedItinerary && extractedItinerary.length > 0) {
+              setItinerary(extractedItinerary);
+              break;
+            }
+          }
+        }
+      }
     }
   };
 

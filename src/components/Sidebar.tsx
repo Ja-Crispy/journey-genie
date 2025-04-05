@@ -1,17 +1,13 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { 
-  Menu, 
-  X, 
-  User, 
-  MessageSquare, 
-  Settings,
-  Plus,
-  Calendar,
-  Clock
-} from 'lucide-react';
+import { Menu, X, MessageSquare, Plus, Clock, MoreVertical, Trash2 } from 'lucide-react';
 import { useTripPlanning } from '@/contexts/TripPlanningContext';
 import { Button } from './ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Props {
   isOpen: boolean;
@@ -19,16 +15,28 @@ interface Props {
 }
 
 const Sidebar: React.FC<Props> = ({ isOpen, toggleSidebar }) => {
-  const location = useLocation();
   const { 
     chatHistory, 
     currentChatId, 
-    setCurrentChatId, 
-    startNewChat 
+    loadChatSession,
+    startNewChat,
+    setChatHistory 
   } = useTripPlanning();
 
   const handleChatSelect = (chatId: string) => {
-    setCurrentChatId(chatId);
+    loadChatSession(chatId);
+  };
+
+  const handleDeleteChat = (chatId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    // Remove chat from history
+    setChatHistory(prev => prev.filter(chat => chat.id !== chatId));
+    
+    // If the current chat is being deleted, start a new chat
+    if (currentChatId === chatId) {
+      startNewChat();
+    }
   };
 
   const formatDate = (date: Date) => {
@@ -60,7 +68,7 @@ const Sidebar: React.FC<Props> = ({ isOpen, toggleSidebar }) => {
       {/* Toggle button */}
       <button
         onClick={toggleSidebar}
-        className="fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg md:hidden"
+        className="fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg md:hidden dark:bg-gray-800 dark:text-gray-200"
         aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
       >
         {isOpen ? <X size={20} /> : <Menu size={20} />}
@@ -68,24 +76,11 @@ const Sidebar: React.FC<Props> = ({ isOpen, toggleSidebar }) => {
 
       {/* Sidebar */}
       <aside 
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out ${
+        className={`fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out dark:bg-gray-800 dark:text-gray-200 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0`}
       >
         <div className="h-full flex flex-col">
-          {/* User Profile */}
-          <div className="p-4 border-b">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-full bg-teal-500 flex items-center justify-center text-white">
-                <User size={20} />
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900">Alex Johnson</h3>
-                <p className="text-xs text-gray-500">alex@example.com</p>
-              </div>
-            </div>
-          </div>
-
           {/* New Chat Button */}
           <div className="p-4">
             <Button 
@@ -99,14 +94,14 @@ const Sidebar: React.FC<Props> = ({ isOpen, toggleSidebar }) => {
 
           {/* Chat History */}
           <div className="flex-1 overflow-y-auto p-4">
-            <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-3">Chat History</h4>
+            <h4 className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3">Chat History</h4>
             <div className="space-y-2">
               {chatHistory.map(chat => (
                 <button
                   key={chat.id}
                   onClick={() => handleChatSelect(chat.id)}
-                  className={`w-full text-left p-2 rounded-lg hover:bg-gray-100 transition-colors ${
-                    chat.id === currentChatId ? 'bg-gray-100' : ''
+                  className={`w-full text-left p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                    chat.id === currentChatId ? 'bg-gray-100 dark:bg-gray-700' : ''
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -114,46 +109,33 @@ const Sidebar: React.FC<Props> = ({ isOpen, toggleSidebar }) => {
                       <MessageSquare size={16} className="text-teal-500" />
                       <div>
                         <div className="text-sm font-medium line-clamp-1">{chat.title}</div>
-                        <div className="text-xs text-gray-500 flex items-center">
+                        <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
                           <Clock size={12} className="mr-1" />
                           {formatDate(chat.createdAt)}
                         </div>
                       </div>
                     </div>
+                    
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                        <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded">
+                          <MoreVertical size={16} className="text-gray-500 dark:text-gray-400" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem 
+                          onClick={(e) => handleDeleteChat(chat.id, e as any)}
+                          className="text-red-500 focus:text-red-500"
+                        >
+                          <Trash2 size={14} className="mr-2" />
+                          Delete Chat
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </button>
               ))}
             </div>
-          </div>
-
-          {/* Navigation */}
-          <div className="p-4 border-t">
-            <nav>
-              <ul className="space-y-2">
-                <li>
-                  <Link 
-                    to="/" 
-                    className={`w-full text-left p-2 rounded-lg flex items-center space-x-2 ${
-                      location.pathname === '/' ? 'bg-teal-500 text-white' : 'hover:bg-gray-100'
-                    }`}
-                  >
-                    <Calendar size={16} className={location.pathname === '/' ? 'text-white' : 'text-teal-500'} />
-                    <span className="text-sm">Trip Planner</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    to="/settings" 
-                    className={`w-full text-left p-2 rounded-lg flex items-center space-x-2 ${
-                      location.pathname === '/settings' ? 'bg-teal-500 text-white' : 'hover:bg-gray-100'
-                    }`}
-                  >
-                    <Settings size={16} className={location.pathname === '/settings' ? 'text-white' : 'text-teal-500'} />
-                    <span className="text-sm">Settings</span>
-                  </Link>
-                </li>
-              </ul>
-            </nav>
           </div>
         </div>
       </aside>

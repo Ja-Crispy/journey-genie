@@ -1,94 +1,96 @@
-# JourneyGenie - AI-Powered Travel Companion
+# JourneyGenie - AI Travel Assistant
 
-JourneyGenie is an intelligent travel planning application that uses AI to help users create personalized travel itineraries. With an intuitive interface and powerful features, it makes travel planning effortless and enjoyable.
+JourneyGenie is an AI-powered travel planning application that helps users create personalized itineraries for their trips. Built with React, TypeScript, and Groq AI, this app provides a conversational interface for travel planning.
 
 ## Features
 
-- 🤖 AI-powered chat interface for natural travel planning
-- 🗺️ Interactive map integration with Google Maps API
-- 📅 Smart calendar for trip date selection
-- 💰 Dynamic budget planning tools
-- ✨ Travel preference customization
-- 📋 Automated itinerary generation
-- 🖼️ Popular attractions carousel
-- 📱 Responsive design for all devices
+- **AI-Powered Chat Interface**: Converse with JourneyGenie to create travel plans
+- **Trip Preferences**: Set budget, dates, and activity preferences
+- **Interactive Itineraries**: View and manage day-by-day travel plans 
+- **Download Itineraries**: Export your travel plans as PDF files
+- **Location Maps**: See destinations and attractions on interactive maps
+- **Chat History**: Save and manage multiple trip conversations
+- **Dark Mode**: Toggle between light and dark themes
 
-## Tech Stack
+## Technologies Used
 
-- React + TypeScript
-- Vite
-- Tailwind CSS
-- Groq AI API
-- Google Maps API
-- shadcn/ui components
-- React Router
-- Lucide Icons
+- React 18 with TypeScript
+- Vite for building and development
+- Groq AI for natural language processing
+- Google Maps API for location services
+- jsPDF for PDF generation
+- Tailwind CSS and shadcn/ui for styling
+- React Router for navigation
+- Lucide React for icons
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (v18 or higher)
-- npm or bun package manager
-- Google Maps API key
+- Node.js (v16 or higher)
+- NPM or Yarn
 - Groq API key
+- Google Maps API key
 
 ### Installation
 
 1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/journeygenie.git
-   cd journeygenie
+   ```
+   git clone https://github.com/Ja-Crispy/journey-genie.git
+   cd journey-genie
    ```
 
 2. Install dependencies:
-   ```bash
-   bun install
-   # or
+   ```
    npm install
    ```
 
-3. Create a `.env` file in the root directory and add your API keys:
-   ```env
+3. Create a `.env` file in the project root with your API keys:
+   ```
    VITE_GROQ_API_KEY=your_groq_api_key
    VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
    ```
 
 4. Start the development server:
-   ```bash
-   bun dev
-   # or
+   ```
    npm run dev
    ```
 
-5. Open [http://localhost:5173](http://localhost:5173) to view the app in your browser.
+5. Open your browser and navigate to `http://localhost:4000`
+
+## Usage
+
+1. Start a new chat or select an existing conversation
+2. Tell JourneyGenie about your travel plans
+3. Set your budget, travel dates, and preferences
+4. Ask for recommendations or specific itinerary details
+5. View your generated itinerary and attractions on the map
+6. Download your itinerary as a PDF for offline reference
 
 ## Project Structure
 
-```
-src/
-├── components/     # Reusable UI components
-├── contexts/      # React context providers
-├── hooks/         # Custom React hooks
-├── lib/          # Utility functions
-├── pages/        # Page components
-└── App.tsx       # Root component
-```
+- `/src/components` - React components
+- `/src/contexts` - Context providers for state management
+- `/src/pages` - Page components for routing
+- `/src/utils` - Utility functions
+- `/src/hooks` - Custom React hooks
+
+## Known Issues and Limitations
+
+- The voice input functionality is currently simulated
+- Map functionality requires a valid Google Maps API key with Places API enabled
+- PDF generation requires proper configuration of jsPDF and jspdf-autotable
 
 ## Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Acknowledgments
 
-- [shadcn/ui](https://ui.shadcn.com/) for the beautiful UI components
-- [Groq](https://groq.com/) for the AI capabilities
+- [Groq AI](https://groq.com/) for providing the AI model API
+- [shadcn/ui](https://ui.shadcn.com/) for component design system
 - [Google Maps Platform](https://developers.google.com/maps) for location services

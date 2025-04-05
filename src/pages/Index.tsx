@@ -6,6 +6,7 @@ import CalendarPicker from '../components/CalendarPicker';
 import PreferenceSelector from '../components/PreferenceSelector';
 import ItineraryDisplay from '../components/ItineraryDisplay';
 import MapDisplay from '../components/MapDisplay';
+import { ThemeToggle } from '../components/theme-toggle';
 import { TripPlanningProvider } from '../contexts/TripPlanningContext';
 
 const Index = () => {
@@ -17,15 +18,18 @@ const Index = () => {
 
   return (
     <TripPlanningProvider>
-      <div className="min-h-screen bg-ivory flex">
+      <div className="min-h-screen bg-ivory dark:bg-gray-900 flex">
         {/* Sidebar */}
         <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
         {/* Main content */}
         <div className="flex-1 flex flex-col md:ml-64">
           {/* Header */}
-          <header className="p-4 bg-white shadow-sm flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-charcoal">JourneyGenie - Your AI-powered travel companion</h1>
+          <header className="p-4 bg-white dark:bg-gray-800 shadow-sm flex items-center justify-between">
+            <h1 className="text-xl font-bold text-teal-500">JourneyGenie</h1>
+            <div className="flex items-center">
+              <ThemeToggle />
+            </div>
           </header>
 
           {/* Main layout */}
