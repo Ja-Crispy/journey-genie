@@ -293,8 +293,8 @@ Create detailed, practical suggestions within these parameters.`;
             className={`${
               message.sender === 'user' 
                 ? 'user-message animate-fade-in ml-auto bg-teal-500 text-white' 
-                : 'assistant-message animate-fade-in mr-auto bg-white'
-            } p-3 rounded-lg max-w-[80%] shadow-sm`}
+                : 'assistant-message animate-fade-in mr-auto bg-white dark:bg-gray-800 dark:text-white'
+            } p-3 rounded-lg max-w-[70%] shadow-sm`} // Adjusted max-width for better readability
           >
             {message.content}
           </div>
@@ -302,7 +302,8 @@ Create detailed, practical suggestions within these parameters.`;
         <div ref={messagesEndRef} />
       </div>
       
-      <div className="p-4 bg-white rounded-b-3xl">
+      {/* Input section with wider padding */}
+      <div className="p-6 bg-white dark:bg-gray-800 rounded-b-3xl">
         <div className="flex items-center space-x-2">
           <input
             type="text"
@@ -310,7 +311,7 @@ Create detailed, practical suggestions within these parameters.`;
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
             placeholder="Type your message..."
-            className="flex-1 p-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="flex-1 p-3 rounded-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 dark:placeholder-gray-400"
             disabled={isLoading}
           />
           <button 

@@ -23,26 +23,25 @@ const PreferenceSelector = () => {
   };
 
   return (
-    <div className="bg-white rounded-xl p-5 shadow-sm">
-      <h2 className="text-xl font-semibold mb-4">Travel Preferences</h2>
-      
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
-        {preferences.map(preference => (
-          <div key={preference.id} className="text-center">
-            <button
-              onClick={() => togglePreference(preference.id)}
-              className={`w-full aspect-square rounded-xl flex items-center justify-center transition-all ${
-                selectedPreferences.includes(preference.id)
-                  ? 'bg-teal-500 text-white shadow-md scale-105'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-              aria-label={`Toggle ${preference.name} preference`}
-              aria-pressed={selectedPreferences.includes(preference.id)}
-            >
-              <preference.icon size={24} />
-            </button>
-            <div className="mt-2 text-sm font-medium">{preference.name}</div>
-          </div>
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm h-full">
+      <h2 className="text-xl font-semibold mb-4 dark:text-white">Travel Preferences</h2>
+      <div className="grid grid-cols-2 gap-2">
+        {preferences.map(pref => (
+          <button
+            key={pref.id}
+            onClick={() => togglePreference(pref.id)}
+            className={`
+              flex items-center gap-2 p-2 rounded-lg transition-colors text-sm
+              ${
+                selectedPreferences.includes(pref.id)
+                  ? 'bg-teal-500 text-white'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }
+            `}
+          >
+            <pref.icon size={14} />
+            <span className="font-medium">{pref.name}</span>
+          </button>
         ))}
       </div>
     </div>

@@ -61,23 +61,23 @@ const CalendarPicker = () => {
   };
 
   return (
-    <div className="bg-white rounded-xl p-5 shadow-sm">
-      <h2 className="text-xl font-semibold mb-4">Calendar</h2>
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm">
+      <h2 className="text-xl font-semibold mb-4 dark:text-white">Calendar</h2>
       
       <div className="mb-4 flex items-center justify-between">
         <button 
           onClick={prevMonth}
-          className="p-1 rounded-full hover:bg-gray-100"
+          className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
           aria-label="Previous month"
         >
           <ChevronLeft size={20} />
         </button>
-        <h3 className="text-lg font-medium">
+        <h3 className="text-lg font-medium dark:text-white">
           {MONTHS[month]} {year}
         </h3>
         <button 
           onClick={nextMonth}
-          className="p-1 rounded-full hover:bg-gray-100"
+          className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
           aria-label="Next month"
         >
           <ChevronRight size={20} />
@@ -86,7 +86,7 @@ const CalendarPicker = () => {
       
       <div className="grid grid-cols-7 gap-1 mb-2">
         {DAYS.map(day => (
-          <div key={day} className="text-center text-sm font-medium text-gray-500 py-1">
+          <div key={day} className="text-center text-sm font-medium text-gray-600 dark:text-gray-400 py-1">
             {day}
           </div>
         ))}
@@ -100,9 +100,9 @@ const CalendarPicker = () => {
                 onClick={() => toggleDateSelection(date)}
                 className={`w-full h-full flex items-center justify-center rounded-full text-sm transition-colors ${
                   isDateSelected(date)
-                    ? 'bg-coral-500 text-white'
-                    : 'hover:bg-gray-100'
-                }`}
+                    ? 'bg-teal-500 text-white'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                } ${date && date < new Date() ? 'text-gray-400 cursor-not-allowed' : 'dark:text-white'}`}
               >
                 {date.getDate()}
               </button>
@@ -114,11 +114,11 @@ const CalendarPicker = () => {
       </div>
 
       {selectedDates.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-gray-100">
-          <h4 className="text-sm font-medium text-gray-700">Selected Dates:</h4>
+        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-400">Selected Dates:</h4>
           <div className="mt-2 flex flex-wrap gap-2">
             {selectedDates.sort((a, b) => a.getTime() - b.getTime()).map((date, index) => (
-              <div key={index} className="px-2 py-1 bg-teal-100 text-teal-800 rounded-full text-xs">
+              <div key={index} className="px-2 py-1 bg-teal-100 text-teal-800 dark:bg-teal-700 dark:text-teal-100 rounded-full text-xs">
                 {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               </div>
             ))}

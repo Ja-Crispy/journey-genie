@@ -32,35 +32,24 @@ const Index = () => {
             </div>
           </header>
 
-          {/* Main layout */}
-          <main className="flex-1 p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
-            {/* Chat section */}
-            <div className="lg:col-span-5 flex flex-col h-[calc(100vh-8rem)]">
+          {/* Main Content */}
+          <main className="flex-1 p-4 md:p-6 space-y-6">
+            {/* Travel Preferences Section */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <BudgetSlider />
+              <CalendarPicker />
+              <PreferenceSelector />
+            </div>
+
+            {/* Chat Section - Wider now */}
+            <div className="h-[400px]">
               <ChatInterface />
             </div>
 
-            {/* Right panel with planning tools */}
-            <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-4 auto-rows-min content-start">
-              {/* First row: Budget & Calendar */}
-              <div className="md:col-span-1">
-                <BudgetSlider />
-              </div>
-              <div className="md:col-span-1">
-                <CalendarPicker />
-              </div>
-
-              {/* Second row: Preferences */}
-              <div className="md:col-span-2">
-                <PreferenceSelector />
-              </div>
-
-              {/* Third row: Itinerary */}
-              <div className="md:col-span-2">
-                <ItineraryDisplay />
-              </div>
-
-              {/* Fourth row: Map */}
-              <div className="md:col-span-2">
+            {/* Results Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <ItineraryDisplay />
+              <div className="space-y-4">
                 <MapDisplay />
               </div>
             </div>

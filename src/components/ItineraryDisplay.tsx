@@ -62,16 +62,16 @@ const ItineraryDisplay = () => {
         {itinerary.map((day) => (
           <div
             key={day.day}
-            className="border rounded-lg p-4 transition-shadow hover:shadow-md"
+            className="border dark:border-gray-700 rounded-lg p-4 transition-shadow hover:shadow-md dark:bg-gray-700/50"
           >
-            <h3 className="font-medium text-teal-600 mb-2">Day {day.day}</h3>
+            <h3 className="font-medium text-teal-600 dark:text-teal-400 mb-2">Day {day.day}</h3>
             <ul className="space-y-3">
               {day.activities.map((activity, index) => (
                 <li key={index} className="flex items-start gap-2">
                   <div className="mt-1.5">
                     <div className="h-1.5 w-1.5 rounded-full bg-coral-500"></div>
                   </div>
-                  <span className="text-sm">{activity}</span>
+                  <span className="text-sm dark:text-gray-200">{activity}</span>
                 </li>
               ))}
             </ul>
