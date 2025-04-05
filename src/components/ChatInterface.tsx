@@ -158,22 +158,39 @@ const ChatInterface = () => {
 
   const extractItineraryFromResponse = (response: string) => {
     try {
-      // Look for day-by-day itinerary in the response
-      const dayMatches = response.match(/Day \d+:[\s\S]*?(?=Day \d+:|$)/g);
+      // Look for day-by-day sections with more flexible pattern
+      const dayMatches = response.match(/Day\s*\d+[:\s-]+[\s\S]*?(?=Day\s*\d+[:\s-]+|$)/g);
       if (!dayMatches) return null;
 
-      return dayMatches.map((dayText, index) => {
+      return dayMatches.map(dayText => {
+        // Extract day number
+        const dayNum = dayText.match(/Day\s*(\d+)/)?.[1];
+        if (!dayNum) return null;
+
+        // Clean up activities
         const activities = dayText
-          .replace(/Day \d+:/, '')
+          .replace(/Day\s*\d+[:\s-]+/, '') // Remove day header
           .split('\n')
-          .filter(line => line.trim())
-          .map(activity => activity.trim().replace(/^[•\-\*]\s*/, ''));
+          .map(line => line.trim())
+          .filter(line => 
+            line && 
+            !line.match(/^Day\s*\d+/) && // Skip any nested day headers
+            !line.match(/^\*\*.*\*\*$/) && // Skip bold markers
+            !line.match(/^\*$/) // Skip single asterisks
+          )
+          .map(activity => 
+            activity
+              .replace(/^[•\-\*]\s*/, '') // Remove bullet points
+              .replace(/\*\*/g, '') // Remove bold markers
+              .trim()
+          );
 
         return {
-          day: index + 1,
-          activities
+          day: parseInt(dayNum),
+          activities: activities.filter(Boolean) // Remove any empty strings
         };
-      });
+      }).filter(Boolean) // Remove any null entries
+      .sort((a, b) => a.day - b.day); // Sort by day number
     } catch (error) {
       console.error('Error extracting itinerary:', error);
       return null;
@@ -225,7 +242,7 @@ Create detailed, practical suggestions within these parameters.`;
       });
 
       const aiResponse = response.choices[0]?.message?.content || "I apologize, but I couldn't generate a response. Please try again.";
-      
+
       // Extract and update itinerary if present in the response
       const extractedItinerary = extractItineraryFromResponse(aiResponse);
       if (extractedItinerary) {

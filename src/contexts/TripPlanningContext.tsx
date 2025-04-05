@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import Groq from 'groq-sdk';
+import { initializeVectorStore, queryVectorStore } from '@/utils/documentProcessing';
 
 interface ChatHistory {
   id: string;
@@ -10,6 +12,18 @@ interface ChatHistory {
   }>;
   destination?: string;
   createdAt: Date;
+}
+
+interface DestinationInfo {
+  description: string;
+  thingsToDo: string[];
+  bestTimeToVisit: string;
+  averageCosts: {
+    accommodation: string;
+    food: string;
+    activities: string;
+  };
+  tips: string[];
 }
 
 interface TripPlanningContextType {
@@ -33,6 +47,8 @@ interface TripPlanningContextType {
   startNewChat: () => void;
   updateCurrentChat: (messages: Array<{ id: number; content: string; sender: 'user' | 'assistant' }>) => void;
   loadChatSession: (chatId: string) => void;
+  destinationInfo: DestinationInfo | null;
+  searchDestination: (destination: string) => Promise<void>;
 }
 
 const TripPlanningContext = createContext<TripPlanningContextType | undefined>(undefined);
@@ -40,26 +56,65 @@ const TripPlanningContext = createContext<TripPlanningContextType | undefined>(u
 // Helper function to extract itinerary from a message
 const extractItineraryFromMessage = (content: string) => {
   try {
-    const dayMatches = content.match(/Day \d+:[\s\S]*?(?=Day \d+:|$)/g);
+    // Look for day-by-day sections with a more flexible pattern
+    const dayMatches = content.match(/Day\s*\d+[:\s-]+[\s\S]*?(?=Day\s*\d+[:\s-]+|$)/g);
     
     if (!dayMatches) return null;
     
-    return dayMatches.map((dayText, index) => {
+    return dayMatches.map(dayText => {
+      // Extract day number
+      const dayNum = dayText.match(/Day\s*(\d+)/)?.[1];
+      if (!dayNum) return null;
+      
+      // Clean up activities
       const activities = dayText
-        .replace(/Day \d+:/, '')
+        .replace(/Day\s*\d+[:\s-]+/, '') // Remove day header
         .split('\n')
-        .filter(line => line.trim())
-        .map(activity => activity.trim().replace(/^[•\-\*]\s*/, ''));
+        .map(line => line.trim())
+        .filter(line => 
+          line && 
+          !line.match(/^Day\s*\d+/) && // Skip any nested day headers
+          !line.match(/^\*\*.*\*\*$/) && // Skip bold markers
+          !line.match(/^\*$/) // Skip single asterisks
+        )
+        .map(activity => 
+          activity
+            .replace(/^[•\-\*]\s*/, '') // Remove bullet points
+            .replace(/\*\*/g, '') // Remove bold markers
+            .trim()
+        );
       
       return {
-        day: index + 1,
-        activities
+        day: parseInt(dayNum),
+        activities: activities.filter(Boolean) // Remove any empty strings
       };
-    });
+    }).filter(Boolean) // Remove any null entries
+    .sort((a, b) => a.day - b.day); // Sort by day number
   } catch (error) {
     console.error('Error extracting itinerary:', error);
     return null;
   }
+};
+
+const extractDestinationAndOrigin = (message: string) => {
+  // Match "from X to Y" pattern
+  const fromToMatch = message.match(/(?:from|in)\s+([A-Za-z\s,]+)\s+to\s+([A-Za-z\s,]+)/i);
+  if (fromToMatch) {
+    return {
+      origin: fromToMatch[1].trim(),
+      destination: fromToMatch[2].trim()
+    };
+  }
+
+  // Match destination only pattern
+  const destinationMatch = message.match(/(?:to|in|at|visit|going to)\s+([A-Za-z\s,]+)(?:\s+from|for|in|on|during|\.|\?|$)/i);
+  if (destinationMatch) {
+    return {
+      destination: destinationMatch[1].trim()
+    };
+  }
+
+  return null;
 };
 
 export function TripPlanningProvider({ children }: { children: React.ReactNode }) {
@@ -70,6 +125,7 @@ export function TripPlanningProvider({ children }: { children: React.ReactNode }
   const [destination, setDestination] = useState<string>('');
   const [chatHistory, setChatHistory] = useState<ChatHistory[]>([]);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+  const [destinationInfo, setDestinationInfo] = useState<DestinationInfo | null>(null);
 
   // Load chat history from localStorage on mount
   useEffect(() => {
@@ -106,6 +162,19 @@ export function TripPlanningProvider({ children }: { children: React.ReactNode }
     }
   }, [destination, currentChatId]);
 
+  // Initialize vector store when the provider mounts
+  useEffect(() => {
+    const initVectorStore = async () => {
+      const initialized = await initializeVectorStore();
+      if (!initialized) {
+        console.error("Failed to initialize vector store");
+      } else {
+        console.log("Vector store initialized successfully");
+      }
+    };
+    initVectorStore();
+  }, []);
+
   const startNewChat = () => {
     const newChatId = crypto.randomUUID();
     const newChat: ChatHistory = {
@@ -124,27 +193,113 @@ export function TripPlanningProvider({ children }: { children: React.ReactNode }
     setItinerary([]);
   };
 
-  const updateCurrentChat = (messages: Array<{ id: number; content: string; sender: 'user' | 'assistant' }>) => {
+  const processAIResponse = async (userMessage: string) => {
+    if (!import.meta.env.VITE_GROQ_API_KEY) {
+      console.error('Groq API key not found');
+      return "I apologize, but I'm not properly configured. Please make sure the API key is set up correctly.";
+    }
+
+    const groq = new Groq({
+      apiKey: import.meta.env.VITE_GROQ_API_KEY,
+      dangerouslyAllowBrowser: true
+    });
+
+    try {
+      // First check for destination in user message
+      const locationInfo = extractDestinationAndOrigin(userMessage);
+      
+      // Get relevant travel guide information
+      const guideResults = await queryVectorStore(userMessage, 3);
+      let travelGuideContext = "";
+      
+      if (guideResults && guideResults.length > 0) {
+        travelGuideContext = guideResults.map(result => 
+          `From ${result.source} (Page ${result.page}):\n${result.content}`
+        ).join('\n\n');
+      }
+
+      // Update destination if found in message
+      if (locationInfo?.destination && locationInfo.destination !== destination) {
+        setDestination(locationInfo.destination);
+        await searchDestination(locationInfo.destination);
+      }
+
+      // Construct prompt with all available context
+      let contextPrompt = `You are JourneyGenie, an AI travel assistant. Use the following information to help answer the user's question:
+
+Travel Guide Information:
+${travelGuideContext}
+
+${destinationInfo ? `Destination Information:
+${JSON.stringify(destinationInfo, null, 2)}` : ''}
+
+${itinerary.length > 0 ? `Current Itinerary:
+${JSON.stringify(itinerary, null, 2)}` : ''}
+
+User Message: ${userMessage}
+
+Instructions:
+1. Use specific information from the travel guides when available
+2. Include exact quotes from the guides when relevant
+3. If suggesting attractions or activities, prioritize ones mentioned in the guides
+4. When creating an itinerary:
+   - Format each day header exactly as "Day X:" (no bold markers or extra spaces)
+   - List activities on new lines without bold markers or asterisks
+   - Keep activities clear and concise
+   - Include key details like costs, timings, and tips within the activity description
+5. If the user asks about costs or logistics, use the real data from destinationInfo
+6. Avoid using markdown formatting like ** or * in responses`;
+
+      const response = await groq.chat.completions.create({
+        messages: [{ role: "user", content: contextPrompt }],
+        model: "llama-3.1-8b-instant",
+        temperature: 0.7,
+        max_tokens: 2000,
+      });
+
+      const content = response.choices[0]?.message?.content;
+      if (!content) {
+        return "I apologize, but I couldn't generate a response. Would you like to try asking in a different way?";
+      }
+
+      // Try to extract and update itinerary if response contains day-by-day plans
+      const extractedItinerary = extractItineraryFromMessage(content);
+      if (extractedItinerary && extractedItinerary.length > 0) {
+        setItinerary(extractedItinerary);
+      }
+
+      return content;
+
+    } catch (error) {
+      console.error('Error processing AI response:', error);
+      return "I apologize, but I encountered an error processing your request. Please try again.";
+    }
+  };
+
+  const updateCurrentChat = async (messages: Array<{ id: number; content: string; sender: 'user' | 'assistant' }>) => {
     if (!currentChatId) return;
-    
+
+    // If this is a new user message, generate AI response
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage && lastMessage.sender === 'user') {
+      const aiResponse = await processAIResponse(lastMessage.content);
+      
+      // Add AI response to messages
+      messages.push({
+        id: messages.length + 1,
+        content: aiResponse,
+        sender: 'assistant'
+      });
+    }
+
+    // Update chat history
     setChatHistory(prev => prev.map(chat => {
       if (chat.id === currentChatId) {
-        // Try to extract a title from the first user message if it's a new chat
-        let title = chat.title;
-        if (title === 'New Chat' && messages.length > 1) {
-          const firstUserMessage = messages.find(m => m.sender === 'user');
-          if (firstUserMessage) {
-            title = firstUserMessage.content.slice(0, 30) + (firstUserMessage.content.length > 30 ? '...' : '');
-          }
-        }
-        
-        // Only update the title if it's a new chat or the destination has changed
-        // This prevents the title from being overwritten when switching between existing chats
         return {
           ...chat,
           messages,
-          title: title === 'New Chat' ? title : chat.title,
-          destination: chat.destination || destination // Only update destination if not already set
+          destination: destination || chat.destination,
+          title: chat.title === 'New Chat' && destination ? `Trip to ${destination}` : chat.title
         };
       }
       return chat;
@@ -175,6 +330,58 @@ export function TripPlanningProvider({ children }: { children: React.ReactNode }
     }
   };
 
+  const searchDestination = async (destination: string) => {
+    try {
+      const groq = new Groq({
+        apiKey: import.meta.env.VITE_GROQ_API_KEY,
+        dangerouslyAllowBrowser: true
+      });
+
+      // First try to get travel info from search
+      const searchPrompt = `Give me comprehensive travel information about ${destination}. Include details about:
+      1. Brief description
+      2. Top things to do and attractions
+      3. Best time to visit
+      4. Average costs for accommodation, food, and activities
+      5. Local travel tips
+
+      Return ONLY a JSON object in this exact format (no other text):
+      {
+        "description": "brief overview of the destination",
+        "thingsToDo": ["array of top attractions and activities"],
+        "bestTimeToVisit": "best season or months to visit",
+        "averageCosts": {
+          "accommodation": "average hotel/hostel costs per night",
+          "food": "average meal costs",
+          "activities": "average activity/attraction costs"
+        },
+        "tips": ["array of useful travel tips"]
+      }`;
+
+      const response = await groq.chat.completions.create({
+        messages: [{ role: "user", content: searchPrompt }],
+        model: "llama-3.1-8b-instant",
+        temperature: 0.3,
+        max_tokens: 1024,
+      });
+
+      const content = response.choices[0]?.message?.content;
+      if (!content) throw new Error('No response from search');
+
+      try {
+        const info = JSON.parse(content);
+        setDestinationInfo(info);
+        console.log('Destination info loaded:', info);
+      } catch (e) {
+        console.error('Error parsing destination info:', e);
+      }
+
+    } catch (error) {
+      console.error('Error searching destination:', error);
+      setDestinationInfo(null);
+    }
+  };
+
   const value = {
     budget,
     setBudget,
@@ -192,7 +399,9 @@ export function TripPlanningProvider({ children }: { children: React.ReactNode }
     setCurrentChatId,
     startNewChat,
     updateCurrentChat,
-    loadChatSession
+    loadChatSession,
+    destinationInfo,
+    searchDestination
   };
 
   return (

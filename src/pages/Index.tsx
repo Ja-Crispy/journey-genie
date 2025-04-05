@@ -6,7 +6,6 @@ import CalendarPicker from '../components/CalendarPicker';
 import PreferenceSelector from '../components/PreferenceSelector';
 import ItineraryDisplay from '../components/ItineraryDisplay';
 import MapDisplay from '../components/MapDisplay';
-import TravelSearch from '../components/TravelSearch';
 import { ThemeToggle } from '../components/theme-toggle';
 import { TripPlanningProvider } from '../contexts/TripPlanningContext';
 
@@ -54,9 +53,6 @@ const Index = () => {
                 <MapDisplay />
               </div>
             </div>
-            
-            {/* Travel Search Section */}
-            <TravelSearch />
           </main>
         </div>
       </div>
