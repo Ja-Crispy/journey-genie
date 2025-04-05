@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
-import { Loader } from '@googlemaps/js-api-loader';
+import { GoogleMap, useJsApiLoader, Marker, Libraries } from '@react-google-maps/api';
 import { useTripPlanning } from '@/contexts/TripPlanningContext';
 import {
   Carousel,
@@ -10,7 +9,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
-const googleMapsLibraries = ['places'];
+const libraries: Libraries = ['places'];
 
 interface PlaceImage {
   url: string;
@@ -30,8 +29,8 @@ const MapDisplay = () => {
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: 'AIzaSyCTsRFJRm4SHUelAAteMY6_oaFERxAELHc',
-    libraries: googleMapsLibraries
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    libraries
   });
 
   useEffect(() => {
@@ -50,31 +49,43 @@ const MapDisplay = () => {
   const fetchPopularPlaces = async (lat: number, lng: number) => {
     try {
       setIsLoading(true);
-      const placesService = new google.maps.places.PlacesService(
-        document.createElement('div')
-      );
+      
+      const map = new google.maps.Map(document.createElement('div'));
+      const service = new google.maps.places.PlacesService(map);
 
       const request = {
         location: { lat, lng },
-        radius: 5000,
         type: 'tourist_attraction',
-        // Places API ranks by distance by default
-        rankBy: google.maps.places.RankBy.DISTANCE
+        rankBy: google.maps.places.RankBy.DISTANCE,
+        keyword: 'tourist attraction'
       };
 
-      placesService.nearbySearch(request, (results, status) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-          const placeImages = results
-            .filter(place => place.photos && place.photos.length > 0)
-            .slice(0, 5)
-            .map(place => ({
-              url: place.photos![0].getUrl(),
-              name: place.name || 'Tourist Attraction'
-            }));
-          setPopularPlaces(placeImages);
-        }
-        setIsLoading(false);
-      });
+      const searchNearby = () => {
+        return new Promise((resolve, reject) => {
+          service.nearbySearch(request, (results, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+              resolve(results);
+            } else {
+              reject(new Error(`Places search failed with status: ${status}`));
+            }
+          });
+        });
+      };
+
+      const results = await searchNearby();
+      const placeImages = (results as google.maps.places.PlaceResult[])
+        .filter(place => place.photos && place.photos.length > 0)
+        .slice(0, 5)
+        .map(place => ({
+          url: place.photos![0].getUrl({
+            maxWidth: 400,
+            maxHeight: 400
+          }),
+          name: place.name || 'Tourist Attraction'
+        }));
+
+      setPopularPlaces(placeImages);
+      setIsLoading(false);
     } catch (error) {
       console.error('Error fetching popular places:', error);
       setIsLoading(false);
