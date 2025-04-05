@@ -53,7 +53,7 @@ JourneyGenie is an AI-powered travel planning application that helps users creat
 
 4. Start the development server:
    ```
-   npm run dev
+   npx vite --port 4000
    ```
 
 5. Open your browser and navigate to `http://localhost:4000`
