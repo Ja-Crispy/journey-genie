@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, Send } from 'lucide-react';
+import { Send } from 'lucide-react';
 import Groq from 'groq-sdk';
 import { useTripPlanning } from '../contexts/TripPlanningContext';
 
@@ -67,7 +67,6 @@ const ChatInterface = () => {
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
-  const [isRecording, setIsRecording] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -285,17 +284,6 @@ Create detailed, practical suggestions within these parameters.`;
     }
   };
 
-  const toggleRecording = () => {
-    setIsRecording(!isRecording);
-    
-    if (!isRecording) {
-      setTimeout(() => {
-        setInputValue('Suggest a budget-friendly itinerary for Barcelona');
-        setIsRecording(false);
-      }, 2000);
-    }
-  };
-
   return (
     <div className="h-full flex flex-col rounded-3xl overflow-hidden bg-teal-coral-gradient">
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -332,16 +320,6 @@ Create detailed, practical suggestions within these parameters.`;
             aria-label="Send message"
           >
             <Send size={20} />
-          </button>
-          <button 
-            onClick={toggleRecording}
-            disabled={isLoading}
-            className={`p-3 rounded-full ${
-              isRecording ? 'bg-coral-500 animate-pulse-gentle' : 'bg-gray-200'
-            } text-white disabled:opacity-50 transition-colors`}
-            aria-label={isRecording ? "Stop recording" : "Start recording"}
-          >
-            <Mic size={20} className={isRecording ? 'text-white' : 'text-gray-700'} />
           </button>
         </div>
       </div>

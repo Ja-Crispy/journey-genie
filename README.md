@@ -75,12 +75,6 @@ JourneyGenie is an AI-powered travel planning application that helps users creat
 - `/src/utils` - Utility functions
 - `/src/hooks` - Custom React hooks
 
-## Known Issues and Limitations
-
-- The voice input functionality is currently simulated
-- Map functionality requires a valid Google Maps API key with Places API enabled
-- PDF generation requires proper configuration of jsPDF and jspdf-autotable
-
 ## Security
 
 This project addresses known security vulnerabilities:
