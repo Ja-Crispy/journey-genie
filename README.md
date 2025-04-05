@@ -81,6 +81,12 @@ JourneyGenie is an AI-powered travel planning application that helps users creat
 - Map functionality requires a valid Google Maps API key with Places API enabled
 - PDF generation requires proper configuration of jsPDF and jspdf-autotable
 
+## Security
+
+This project addresses known security vulnerabilities:
+- esbuild is maintained at version 0.25.0 or higher to prevent unauthorized access to the development server
+- Regular dependency updates are performed to mitigate security risks
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
