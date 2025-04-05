@@ -58,28 +58,104 @@ const ChatInterface = () => {
     selectedDates,
     selectedPreferences,
     setItinerary,
-    setDestination
+    setDestination,
+    chatHistory, 
+    currentChatId, 
+    updateCurrentChat,
+    startNewChat
   } = useTripPlanning();
 
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
-      content: "Hello! I'm JourneyGenie, your AI travel assistant. How can I help plan your next adventure?",
-      sender: "assistant"
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Controlled scroll to bottom function with debounce
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Clear any pending scroll timeout
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+    
+    // Set a new timeout for scrolling
+    scrollTimeoutRef.current = setTimeout(() => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+      scrollTimeoutRef.current = null;
+    }, 100);
   };
 
+  // Load messages only once when currentChatId changes
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (!isInitialized || !chatHistory.length) {
+      if (currentChatId) {
+        const currentChat = chatHistory.find(chat => chat.id === currentChatId);
+        if (currentChat?.messages?.length) {
+          setMessages(currentChat.messages);
+          setIsInitialized(true);
+        } else if (chatHistory.length > 0) {
+          startNewChat();
+        }
+      } else if (chatHistory.length > 0) {
+        // If no chat is selected but there are saved chats, load the most recent one
+        const mostRecentChat = chatHistory[0];
+        setMessages(mostRecentChat.messages);
+        setIsInitialized(true);
+      } else {
+        // If there are no chats, keep default welcome message
+        setMessages([{
+          id: 1,
+          content: "Hello! I'm JourneyGenie, your AI travel assistant. How can I help plan your next adventure?",
+          sender: "assistant"
+        }]);
+        setIsInitialized(true);
+      }
+    }
+  }, []);
+
+  // Handle chat switching
+  useEffect(() => {
+    if (currentChatId) {
+      const currentChat = chatHistory.find(chat => chat.id === currentChatId);
+      if (currentChat?.messages?.length) {
+        // Reset state before loading new messages
+        setIsInitialized(false);
+        setMessages([]);
+        
+        // Small delay to ensure state is reset before setting new messages
+        setTimeout(() => {
+          setMessages(currentChat.messages);
+          setIsInitialized(true);
+        }, 50);
+      }
+    }
+  }, [currentChatId]);
+
+  // Synchronize local messages state with the context, but only when messages change
+  // due to user interaction, not when loading from history
+  useEffect(() => {
+    if (currentChatId && messages.length > 0 && isInitialized) {
+      updateCurrentChat(messages);
+    }
+  }, [messages, isInitialized]);
+
+  // Scroll to bottom only when messages change and component is initialized
+  useEffect(() => {
+    if (isInitialized && messages.length > 0) {
+      scrollToBottom();
+    }
+    
+    // Clean up any pending timeout when unmounting
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [messages, isInitialized]);
 
   const extractItineraryFromResponse = (response: string) => {
     try {

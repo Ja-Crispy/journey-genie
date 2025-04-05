@@ -32,6 +32,7 @@ interface TripPlanningContextType {
   setCurrentChatId: (id: string | null) => void;
   startNewChat: () => void;
   updateCurrentChat: (messages: Array<{ id: number; content: string; sender: 'user' | 'assistant' }>) => void;
+  loadChatSession: (chatId: string) => void;
 }
 
 const TripPlanningContext = createContext<TripPlanningContextType | undefined>(undefined);
@@ -111,15 +112,33 @@ export function TripPlanningProvider({ children }: { children: React.ReactNode }
             title = firstUserMessage.content.slice(0, 30) + (firstUserMessage.content.length > 30 ? '...' : '');
           }
         }
+        
+        // Only update the title if it's a new chat or the destination has changed
+        // This prevents the title from being overwritten when switching between existing chats
         return {
           ...chat,
           messages,
-          title,
-          destination
+          title: title === 'New Chat' ? title : chat.title,
+          destination: chat.destination || destination // Only update destination if not already set
         };
       }
       return chat;
     }));
+  };
+
+  const loadChatSession = (chatId: string) => {
+    const chat = chatHistory.find(c => c.id === chatId);
+    if (chat) {
+      // First clear any existing state
+      setItinerary([]);
+      
+      // Then load the saved chat data
+      setCurrentChatId(chatId);
+      setDestination(chat.destination || '');
+      
+      // We don't need to manually set the messages here
+      // The ChatInterface component should pull them from chatHistory using currentChatId
+    }
   };
 
   const value = {
@@ -138,7 +157,8 @@ export function TripPlanningProvider({ children }: { children: React.ReactNode }
     currentChatId,
     setCurrentChatId,
     startNewChat,
-    updateCurrentChat
+    updateCurrentChat,
+    loadChatSession
   };
 
   return (
