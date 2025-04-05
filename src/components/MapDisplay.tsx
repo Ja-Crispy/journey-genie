@@ -1,49 +1,152 @@
+import React, { useState, useEffect } from 'react';
+import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
+import { Loader } from '@googlemaps/js-api-loader';
+import { useTripPlanning } from '@/contexts/TripPlanningContext';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
-import React from 'react';
-import { MapPin, Download } from 'lucide-react';
+const googleMapsLibraries = ['places'];
+
+interface PlaceImage {
+  url: string;
+  name: string;
+}
+
+interface Location {
+  lat: number;
+  lng: number;
+}
 
 const MapDisplay = () => {
+  const { destination } = useTripPlanning();
+  const [location, setLocation] = useState<Location>({ lat: 0, lng: 0 });
+  const [popularPlaces, setPopularPlaces] = useState<PlaceImage[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: 'AIzaSyCTsRFJRm4SHUelAAteMY6_oaFERxAELHc',
+    libraries: googleMapsLibraries
+  });
+
+  useEffect(() => {
+    if (!destination) return;
+
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ address: destination }, (results, status) => {
+      if (status === 'OK' && results && results[0]) {
+        const { lat, lng } = results[0].geometry.location;
+        setLocation({ lat: lat(), lng: lng() });
+        fetchPopularPlaces(lat(), lng());
+      }
+    });
+  }, [destination]);
+
+  const fetchPopularPlaces = async (lat: number, lng: number) => {
+    try {
+      setIsLoading(true);
+      const placesService = new google.maps.places.PlacesService(
+        document.createElement('div')
+      );
+
+      const request = {
+        location: { lat, lng },
+        radius: 5000,
+        type: 'tourist_attraction',
+        // Places API ranks by distance by default
+        rankBy: google.maps.places.RankBy.DISTANCE
+      };
+
+      placesService.nearbySearch(request, (results, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+          const placeImages = results
+            .filter(place => place.photos && place.photos.length > 0)
+            .slice(0, 5)
+            .map(place => ({
+              url: place.photos![0].getUrl(),
+              name: place.name || 'Tourist Attraction'
+            }));
+          setPopularPlaces(placeImages);
+        }
+        setIsLoading(false);
+      });
+    } catch (error) {
+      console.error('Error fetching popular places:', error);
+      setIsLoading(false);
+    }
+  };
+
+  const mapContainerStyle = {
+    width: '100%',
+    height: '400px',
+    borderRadius: '0.75rem'
+  };
+
+  if (!isLoaded || isLoading) {
+    return (
+      <div className="bg-white rounded-xl p-5 shadow-sm">
+        <h2 className="text-xl font-semibold mb-4">Location & Attractions</h2>
+        <div className="animate-pulse">
+          <div className="bg-gray-200 rounded-xl h-[400px] mb-4"></div>
+          <div className="bg-gray-200 rounded-xl h-32"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm">
-      <div className="relative h-48 bg-teal-50">
-        {/* Map placeholder - would be replaced with actual map integration */}
-        <div className="absolute inset-0 overflow-hidden bg-gray-100 flex items-center justify-center">
-          <div className="text-gray-400 text-center p-4">
-            <MapPin size={36} className="mx-auto mb-2 text-teal-500" />
-            <p className="text-sm">Interactive map will be displayed here</p>
-          </div>
-        </div>
-        
-        {/* Location marker */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <div className="relative">
-            <MapPin size={36} className="text-coral-500 drop-shadow-md" />
-            <div className="absolute inset-0 animate-ping rounded-full bg-coral-500 opacity-75" style={{ width: '10px', height: '10px', top: '8px', left: '13px' }}></div>
-          </div>
-        </div>
-        
-        {/* Location label */}
-        <div className="absolute top-4 left-4 bg-white bg-opacity-90 px-3 py-1 rounded-full shadow-sm">
-          <span className="font-medium">Barcelona</span>
-        </div>
-      </div>
+    <div className="bg-white rounded-xl p-5 shadow-sm">
+      <h2 className="text-xl font-semibold mb-4">Location & Attractions</h2>
       
-      <div className="p-4 flex justify-between items-center">
-        <div className="flex items-center space-x-2">
-          <div className="w-10 h-10 rounded-full flex items-center justify-center bg-teal-100 text-teal-600">
-            <MapPin size={20} />
+      {destination ? (
+        <>
+          <div className="mb-4">
+            <GoogleMap
+              mapContainerStyle={mapContainerStyle}
+              center={location}
+              zoom={13}
+            >
+              <Marker position={location} />
+            </GoogleMap>
           </div>
-          <div>
-            <h3 className="font-medium">Google Maps</h3>
-            <p className="text-xs text-gray-500">View attractions</p>
-          </div>
+
+          {popularPlaces.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-lg font-medium mb-3">Popular Attractions</h3>
+              <Carousel className="w-full">
+                <CarouselContent>
+                  {popularPlaces.map((place, index) => (
+                    <CarouselItem key={index} className="basis-1/2 md:basis-1/3">
+                      <div className="relative aspect-square overflow-hidden rounded-lg">
+                        <img
+                          src={place.url}
+                          alt={place.name}
+                          className="object-cover w-full h-full"
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-sm">
+                          {place.name}
+                        </div>
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="text-center py-8 text-gray-500">
+          <div className="mb-3">🗺️</div>
+          <p>Start chatting to see your destination on the map!</p>
         </div>
-        
-        <button className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
-          <Download size={16} />
-          <span>Download PDF</span>
-        </button>
-      </div>
+      )}
     </div>
   );
 };

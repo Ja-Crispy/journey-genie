@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTripPlanning } from '@/contexts/TripPlanningContext';
 
-const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const DAYS = ['Su', 'M', 'T', 'W', 'Th', 'F', 'Sa'];
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'
@@ -10,10 +10,7 @@ const MONTHS = [
 
 const CalendarPicker = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDates, setSelectedDates] = useState<Date[]>([
-    new Date(2024, 5, 19), // June 19, 2024
-    new Date(2024, 5, 20), // June 20, 2024
-  ]);
+  const { selectedDates, setSelectedDates } = useTripPlanning();
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -58,7 +55,8 @@ const CalendarPicker = () => {
           selectedDate.getFullYear() === date.getFullYear())
       ));
     } else {
-      setSelectedDates([...selectedDates, date]);
+      const newDates = [...selectedDates, date].sort((a, b) => a.getTime() - b.getTime());
+      setSelectedDates(newDates);
     }
   };
 

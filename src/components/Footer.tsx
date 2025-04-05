@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Facebook, Twitter, Instagram, Github } from 'lucide-react';
 
@@ -7,9 +6,9 @@ const Footer = () => {
     <footer className="bg-charcoal text-ivory py-10">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center">
-          <div className="mb-6 md:mb-0">
-            <h2 className="text-xl font-bold text-teal-400">Wanderlust Unleashed</h2>
-            <p className="text-sm text-gray-400 mt-2">Your AI travel companion</p>
+          <div className="mb-6 md:mb-0 text-center md:text-left">
+            <h2 className="text-xl font-bold text-teal-400">JourneyGenie</h2>
+            <p className="text-sm text-gray-400 mt-2">Your AI-powered travel companion</p>
           </div>
           
           <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-8">
@@ -33,7 +32,7 @@ const Footer = () => {
         <div className="border-t border-gray-700 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-sm text-gray-400">
-              &copy; {new Date().getFullYear()} Agentic Travel Assistant. All rights reserved.
+              &copy; {new Date().getFullYear()} JourneyGenie. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <a href="#" className="text-sm text-gray-400 hover:text-teal-400 transition-colors duration-300">
