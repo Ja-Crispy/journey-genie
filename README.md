@@ -1,27 +1,35 @@
 # JourneyGenie - AI Travel Assistant
 
-JourneyGenie is an AI-powered travel planning application that helps users create personalized itineraries for their trips. Built with React, TypeScript, and Groq AI, this app provides a conversational interface for travel planning.
+JourneyGenie is an AI-powered travel planning application that helps users create personalized itineraries for their trips. Built with React, TypeScript, and Groq AI, this app provides a conversational interface for travel planning, enriched with expert travel guide knowledge.
 
 ## Features
 
-- **AI-Powered Chat Interface**: Converse with JourneyGenie to create travel plans
-- **Trip Preferences**: Set budget, dates, and activity preferences
-- **Interactive Itineraries**: View and manage day-by-day travel plans 
-- **Download Itineraries**: Export your travel plans as PDF files
-- **Location Maps**: See destinations and attractions on interactive maps
-- **Chat History**: Save and manage multiple trip conversations
-- **Dark Mode**: Toggle between light and dark themes
+- **AI-Powered Chat Interface**: Converse naturally with JourneyGenie to plan your trips
+- **Smart Travel Recommendations**: Get personalized suggestions based on travel guide content
+- **Trip Preferences**: Set budget, dates, and activity preferences for tailored recommendations
+- **Interactive Itineraries**: View and manage comprehensive day-by-day travel plans 
+- **Smart Destination Info**: Access detailed information about destinations, including costs and tips
+- **Visual Exploration**: See destinations and nearby attractions on interactive maps
+- **PDF Export**: Download beautifully formatted itineraries for offline reference
+- **Trip History**: Save and manage multiple trip conversations
+- **Dark Mode**: Toggle between light and dark themes for comfortable viewing
+- **Responsive Design**: Seamless experience across desktop and mobile devices
 
 ## Technologies Used
 
-- React 18 with TypeScript
-- Vite for building and development
-- Groq AI for natural language processing
-- Google Maps API for location services
-- jsPDF for PDF generation
-- Tailwind CSS and shadcn/ui for styling
-- React Router for navigation
-- Lucide React for icons
+- **Frontend Framework**: React 18 with TypeScript
+- **Build Tool**: Vite for fast development and optimized builds
+- **AI Integration**: 
+  - Groq AI for natural language processing
+  - LangChain for document processing and embeddings
+- **UI Components**: 
+  - Tailwind CSS for styling
+  - shadcn/ui for consistent design system
+  - Lucide React for iconography
+- **Maps & Location**: Google Maps JavaScript API with Places library
+- **PDF Generation**: jsPDF with AutoTable plugin
+- **Routing**: React Router for navigation
+- **State Management**: React Context API with custom hooks
 
 ## Getting Started
 
@@ -31,6 +39,7 @@ JourneyGenie is an AI-powered travel planning application that helps users creat
 - NPM or Yarn
 - Groq API key
 - Google Maps API key
+- OpenAI API key (for embeddings)
 
 ### Installation
 
@@ -49,6 +58,7 @@ JourneyGenie is an AI-powered travel planning application that helps users creat
    ```
    VITE_GROQ_API_KEY=your_groq_api_key
    VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+   VITE_OPENAI_API_KEY=your_openai_api_key
    ```
 
 4. Start the development server:
@@ -61,29 +71,41 @@ JourneyGenie is an AI-powered travel planning application that helps users creat
 ## Usage
 
 1. Start a new chat or select an existing conversation
-2. Tell JourneyGenie about your travel plans
-3. Set your budget, travel dates, and preferences
-4. Ask for recommendations or specific itinerary details
-5. View your generated itinerary and attractions on the map
-6. Download your itinerary as a PDF for offline reference
+2. Tell JourneyGenie about your desired destination and travel plans
+3. Set your budget, travel dates, and preferences using the intuitive controls
+4. Ask for specific recommendations or general travel advice
+5. View your personalized itinerary with day-by-day activities
+6. Explore your destination and attractions on the interactive map
+7. Download your complete itinerary as a PDF for offline reference
 
 ## Project Structure
 
-- `/src/components` - React components
-- `/src/contexts` - Context providers for state management
-- `/src/pages` - Page components for routing
-- `/src/utils` - Utility functions
-- `/src/hooks` - Custom React hooks
+- `/src`
+  - `/components` - Reusable React components
+  - `/contexts` - Context providers for state management
+  - `/pages` - Main application pages
+  - `/utils` - Utility functions for PDF generation and API integrations
+  - `/hooks` - Custom React hooks
+  - `/lib` - Shared utilities and helper functions
 
 ## Security
 
-This project addresses known security vulnerabilities:
-- esbuild is maintained at version 0.25.0 or higher to prevent unauthorized access to the development server
-- Regular dependency updates are performed to mitigate security risks
+This project implements several security measures:
+- Environment variables for API key protection
+- Client-side API key validation
+- Regular dependency updates for security patches
+- Input sanitization for user-provided content
+- Secure PDF generation without external dependencies
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes:
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## License
 
@@ -92,5 +114,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Acknowledgments
 
 - [Groq AI](https://groq.com/) for providing the AI model API
-- [shadcn/ui](https://ui.shadcn.com/) for component design system
+- [shadcn/ui](https://ui.shadcn.com/) for the excellent component system
 - [Google Maps Platform](https://developers.google.com/maps) for location services
+- [LangChain](https://js.langchain.com/) for document processing capabilities
